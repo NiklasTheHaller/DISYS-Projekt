@@ -31,6 +31,7 @@ public class StationDataCollector {
             JSONObject inputJson = new JSONObject(message);
             String stationUrl = inputJson.getString("stationUrl");
             int customerId = inputJson.getInt("customerId");
+            long startTime = inputJson.getLong("startTime");
 
             System.out.println(" [x] Received Station Data Request: '" + message + "'");
 
@@ -43,6 +44,7 @@ public class StationDataCollector {
             // Create JSON message
             JSONObject outputJson = new JSONObject();
             outputJson.put("customerId", customerId);
+            outputJson.put("startTime", startTime);
             JSONArray chargesArray = new JSONArray();
             for (Charge charge : charges) {
                 JSONObject chargeJson = new JSONObject();

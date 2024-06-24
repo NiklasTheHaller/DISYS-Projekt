@@ -23,6 +23,7 @@ public class DataCollectionReceiver {
     static final Map<String, Integer> jobCounts = new HashMap<>();
     static final Map<String, Integer> jobReceived = new HashMap<>();
     static final Map<String, String> customerNames = new HashMap<>();
+    static final Map<String, Long> jobStartTimes = new HashMap<>();
     private Channel channel;
 
     public DataCollectionReceiver(Channel channel) {
@@ -37,12 +38,15 @@ public class DataCollectionReceiver {
             String customerId = jsonNode.get("customerId").asText();
             String customerName = jsonNode.get("customerName").asText();
             int totalMessages = jsonNode.get("totalMessages").asInt();
+            long startTime = jsonNode.get("startTime").asLong();
             jobData.put(customerId, new JSONArray());
             jobCounts.put(customerId, totalMessages);
             jobReceived.put(customerId, 0);
             customerNames.put(customerId, customerName);
+            jobStartTimes.put(customerId, startTime);
         } else {
             String customerId = jsonNode.get("customerId").asText();
+            long startTime = jsonNode.get("startTime").asLong();
             JsonNode chargesNode = jsonNode.get("charges");
 
             JSONArray dataArray = jobData.get(customerId);
@@ -59,6 +63,7 @@ public class DataCollectionReceiver {
                 aggregatedData.put("customerId", customerId);
                 aggregatedData.put("customer", "Customer: " + customerNames.get(customerId));
                 aggregatedData.put("charges", dataArray);
+                aggregatedData.put("startTime", startTime);
                 channel.basicPublish("", OUTPUT_QUEUE, null, aggregatedData.toString().getBytes(StandardCharsets.UTF_8));
             }
         }
