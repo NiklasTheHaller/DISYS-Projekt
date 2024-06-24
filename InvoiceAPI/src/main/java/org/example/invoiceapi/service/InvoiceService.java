@@ -25,10 +25,11 @@ public class InvoiceService {
     private static final String METADATA_QUEUE = "invoiceMetadataQueue";
     private ConcurrentMap<Integer, InvoiceMetadata> metadataMap = new ConcurrentHashMap<>();
 
-    public void sendInvoiceRequest(int customerId) {
+    public void sendInvoiceRequest(int customerId, long startTime) {
         // Create JSON message
         JSONObject message = new JSONObject();
         message.put("customerId", customerId);
+        message.put("startTime", startTime);
 
         // Send message to RabbitMQ
         rabbitTemplate.convertAndSend(RabbitMQConfig.INPUT_QUEUE, message.toString());
@@ -46,7 +47,8 @@ public class InvoiceService {
             int customerId = jsonNode.get("customerId").asInt();
             String downloadLink = jsonNode.get("filePath").asText();
             long creationTime = jsonNode.get("creationTime").asLong();
-            InvoiceMetadata metadata = new InvoiceMetadata(downloadLink, creationTime);
+            long totalTime = jsonNode.get("totalTime").asLong();
+            InvoiceMetadata metadata = new InvoiceMetadata(downloadLink, creationTime, totalTime);
             metadataMap.put(customerId, metadata);
         } catch (IOException e) {
             e.printStackTrace();

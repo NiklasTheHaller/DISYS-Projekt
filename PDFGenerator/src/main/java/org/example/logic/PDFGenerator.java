@@ -73,12 +73,17 @@ public class PDFGenerator {
 
         // Extract customerId from the rootNode
         int customerId = rootNode.get("customerId").asInt();
+        long startTime = rootNode.get("startTime").asLong();
+        long endTime = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
+
 
         // Send metadata back to InvoiceAPI
         JsonNode metadata = mapper.createObjectNode()
                 .put("customerId", customerId)
                 .put("filePath", filePath)
-                .put("creationTime", System.currentTimeMillis());
+                .put("creationTime", endTime)
+                .put("totalTime", totalTime);
         channel.basicPublish("", OUTPUT_QUEUE, null, metadata.toString().getBytes(StandardCharsets.UTF_8));
         System.out.println(" [x] Sent Metadata: '" + metadata + "'");
     }

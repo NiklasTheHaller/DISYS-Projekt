@@ -34,6 +34,7 @@ public class DataCollectionDispatcher {
         try {
             JSONObject inputJson = new JSONObject(input);
             int customerId = inputJson.getInt("customerId");
+            long startTime = inputJson.getLong("startTime");
 
             System.out.println(" [x] Received Customer ID: '" + customerId + "'");
 
@@ -54,6 +55,7 @@ public class DataCollectionDispatcher {
             jobStartMessage.put("customerId", customer.getId());
             jobStartMessage.put("customerName", customer.getFirstName() + " " + customer.getLastName());
             jobStartMessage.put("totalMessages", totalStations);
+            jobStartMessage.put("startTime", startTime);
 
             channel.basicPublish("", DATA_COLLECTION_RECEIVER_OUTPUT_QUEUE, null, jobStartMessage.toString().getBytes(StandardCharsets.UTF_8));
 
@@ -62,6 +64,7 @@ public class DataCollectionDispatcher {
                 JSONObject stationMessage = new JSONObject();
                 stationMessage.put("stationUrl", station.getDbUrl());
                 stationMessage.put("customerId", customerId);
+                stationMessage.put("startTime", startTime);
                 channel.basicPublish("", STATION_DATA_COLLECTOR_OUTPUT_QUEUE, null, stationMessage.toString().getBytes(StandardCharsets.UTF_8));
             }
         } catch (Exception e) {

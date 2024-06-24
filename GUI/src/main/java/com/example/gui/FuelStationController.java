@@ -9,7 +9,6 @@ import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.client5.http.fluent.Content;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.hc.core5.http.HttpResponse;
 
 import java.io.IOException;
 
@@ -48,12 +47,15 @@ public class FuelStationController {
                         .execute().returnContent();
 
                 if (responseContent != null) {
+                    Thread.sleep(1000);
                     checkInvoiceStatus(customerId);
                 } else {
                     Platform.runLater(() -> statusLabel.setText("Failed to start invoice generation"));
                 }
             } catch (IOException e) {
                 Platform.runLater(() -> statusLabel.setText("Error: " + e.getMessage()));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             } finally {
                 Platform.runLater(() -> generateInvoiceButton.setDisable(false));
             }
@@ -69,10 +71,21 @@ public class FuelStationController {
 
                     if (responseContent != null) {
                         JsonNode jsonNode = objectMapper.readTree(responseContent.asString());
+
+                        // Log the response for debugging
+                        System.out.println("Received JSON response: " + jsonNode.toString());
+
                         String downloadLink = jsonNode.get("downloadLink").asText();
-                        String creationTime = jsonNode.get("creationTime").asText();
-                        Thread.sleep(1500);//
-                        Platform.runLater(() -> statusLabel.setText("Invoice generated"));
+                        JsonNode creationTimeNode = jsonNode.get("creationTime");
+                        JsonNode totalTimeNode = jsonNode.get("totalTime");
+
+                        if (creationTimeNode != null && totalTimeNode != null) {
+                            long creationTime = creationTimeNode.asLong();
+                            long totalTime = totalTimeNode.asLong();
+                            Platform.runLater(() -> statusLabel.setText("Invoice generated: " + downloadLink + " (File generated in " + totalTime + "ms)"));
+                        } else {
+                            Platform.runLater(() -> statusLabel.setText("Invoice generated: " + downloadLink));
+                        }
                         break;
                     } else {
                         Thread.sleep(5000); // Wait for 5 seconds before checking again
@@ -84,6 +97,7 @@ public class FuelStationController {
             }
         }).start();
     }
+
     @FXML
     private void getInvoice() {
         String customerId = customerIdField.getText();
@@ -104,10 +118,19 @@ public class FuelStationController {
                     if (responseContent != null) {
                         try {
                             JsonNode jsonNode = objectMapper.readTree(responseContent.asString());
+
+                            // Log the response for debugging
+                            System.out.println("Received JSON response: " + jsonNode.toString());
+
                             String downloadLink = jsonNode.get("downloadLink").asText();
-                            long creationTime = jsonNode.get("creationTime").asLong();
-                            creationTime = creationTime - currentTime;
-                            statusLabel.setText("Invoice available: " + downloadLink + " (File generated in " + creationTime + "ms)");
+                            JsonNode totalTimeNode = jsonNode.get("totalTime");
+
+                            if (totalTimeNode != null) {
+                                long totalTime = totalTimeNode.asLong();
+                                statusLabel.setText("Invoice available: " + downloadLink + " (File generated in " + totalTime + "ms)");
+                            } else {
+                                statusLabel.setText("Invoice available: " + downloadLink);
+                            }
                         } catch (IOException e) {
                             statusLabel.setText("Error: " + e.getMessage());
                         }

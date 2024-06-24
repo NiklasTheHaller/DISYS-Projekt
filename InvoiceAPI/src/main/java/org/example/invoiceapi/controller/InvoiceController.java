@@ -19,7 +19,8 @@ public class InvoiceController {
 
     @PostMapping("/{customerId}")
     public ResponseEntity<String> generateInvoice(@PathVariable int customerId) {
-        invoiceService.sendInvoiceRequest(customerId);
+        long startTime = System.currentTimeMillis();
+        invoiceService.sendInvoiceRequest(customerId, startTime);
         return ResponseEntity.ok("Invoice generation started for customer ID: " + customerId);
     }
 
@@ -30,6 +31,7 @@ public class InvoiceController {
             Map<String, Object> response = new HashMap<>();
             response.put("downloadLink", metadata.get().getDownloadLink());
             response.put("creationTime", metadata.get().getCreationTime());
+            response.put("totalTime", metadata.get().getTotalTime());
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(404).body(null);
