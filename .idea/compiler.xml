@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="StationDataCollector" />
         <module name="DataCollectionDispatcher" />
+        <module name="GUI" />
         <module name="DataCollectionReceiver" />
         <module name="InvoiceAPI" />
         <module name="PDFGenerator" />

@@ -41,12 +41,14 @@ public class PDFGeneratorTest {
     @Test
     public void testProcessMessage() throws IOException, DocumentException {
         // Arrange
+        long startTime = System.currentTimeMillis();
         JSONArray charges = new JSONArray()
-                .put(new JSONObject().put("id", "1").put("kwh", 10).put("customerId", 1).toString())
-                .put(new JSONObject().put("id", "2").put("kwh", 20).put("customerId", 1).toString());
+                .put(new JSONObject().put("id", "1").put("kwh", 10).toString())
+                .put(new JSONObject().put("id", "2").put("kwh", 20).toString());
         String input = new JSONObject()
                 .put("customerId", 1)
                 .put("customer", "Customer: John Doe")
+                .put("startTime", startTime)
                 .put("charges", charges)
                 .toString();
 
@@ -63,6 +65,7 @@ public class PDFGeneratorTest {
         assertEquals(1, sentJson.getInt("customerId"));
         assertTrue(sentJson.has("filePath"));
         assertTrue(sentJson.has("creationTime"));
+        assertTrue(sentJson.has("totalTime"));
 
         // Verify the PDF was created
         File[] files = new File(TEST_OUTPUT_PATH).listFiles((dir, name) -> name.startsWith("invoice_") && name.endsWith(".pdf"));

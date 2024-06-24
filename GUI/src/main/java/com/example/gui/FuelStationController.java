@@ -47,7 +47,7 @@ public class FuelStationController {
                         .execute().returnContent();
 
                 if (responseContent != null) {
-                    Thread.sleep(1000);
+                    Thread.sleep(1);
                     checkInvoiceStatus(customerId);
                 } else {
                     Platform.runLater(() -> statusLabel.setText("Failed to start invoice generation"));
