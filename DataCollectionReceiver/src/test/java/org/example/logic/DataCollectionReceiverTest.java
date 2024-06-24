@@ -6,14 +6,14 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class DataCollectionReceiverTest {
@@ -30,11 +30,13 @@ public class DataCollectionReceiverTest {
     @Test
     public void testProcessMessage_JobStart() throws Exception {
         // Arrange
+        long startTime = System.currentTimeMillis();
         String message = new JSONObject()
                 .put("jobStart", true)
                 .put("customerId", "1")
                 .put("customerName", "John Doe")
                 .put("totalMessages", 2)
+                .put("startTime", startTime)
                 .toString();
 
         // Act
@@ -45,22 +47,26 @@ public class DataCollectionReceiverTest {
         assertTrue(DataCollectionReceiver.jobCounts.containsKey("1"));
         assertTrue(DataCollectionReceiver.jobReceived.containsKey("1"));
         assertTrue(DataCollectionReceiver.customerNames.containsKey("1"));
+        assertTrue(DataCollectionReceiver.jobStartTimes.containsKey("1"));
 
         assertEquals(new JSONArray().toString(), DataCollectionReceiver.jobData.get("1").toString());
         assertEquals(2, DataCollectionReceiver.jobCounts.get("1"));
         assertEquals(0, DataCollectionReceiver.jobReceived.get("1"));
         assertEquals("John Doe", DataCollectionReceiver.customerNames.get("1"));
+        assertEquals(startTime, DataCollectionReceiver.jobStartTimes.get("1"));
     }
 
     @Test
     public void testProcessMessage_JobData() throws Exception {
         // Arrange
         // Initialize with job start
+        long startTime = System.currentTimeMillis();
         String jobStartMessage = new JSONObject()
                 .put("jobStart", true)
                 .put("customerId", "1")
                 .put("customerName", "John Doe")
                 .put("totalMessages", 1)
+                .put("startTime", startTime)
                 .toString();
         receiver.processMessage(jobStartMessage);
 
@@ -69,6 +75,7 @@ public class DataCollectionReceiverTest {
         String jobDataMessage = new JSONObject()
                 .put("customerId", "1")
                 .put("charges", charges)
+                .put("startTime", startTime)
                 .toString();
 
         // Act
@@ -86,6 +93,7 @@ public class DataCollectionReceiverTest {
         assertEquals("1", sentJson.getString("customerId"));
         assertEquals("Customer: John Doe", sentJson.getString("customer"));
         assertEquals(convertJSONArrayToStringList(charges), convertJSONArrayToStringList(sentJson.getJSONArray("charges")));
+        assertEquals(startTime, sentJson.getLong("startTime"));
     }
 
     private List<String> convertJSONArrayToStringList(JSONArray jsonArray) {

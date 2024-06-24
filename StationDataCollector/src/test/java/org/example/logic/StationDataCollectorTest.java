@@ -13,7 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class StationDataCollectorTest {
@@ -32,9 +33,11 @@ public class StationDataCollectorTest {
     @Test
     public void testProcessMessage() throws Exception {
         // Arrange
+        long startTime = System.currentTimeMillis();
         String message = new JSONObject()
                 .put("stationUrl", "jdbc:postgresql://localhost:5432/stationdb")
                 .put("customerId", 1)
+                .put("startTime", startTime)
                 .toString();
         List<Charge> charges = Arrays.asList(
                 new Charge(1, 10.0F, 1),
@@ -54,6 +57,7 @@ public class StationDataCollectorTest {
         JSONObject sentJson = new JSONObject(sentMessage);
 
         assertEquals(1, sentJson.getInt("customerId"));
+        assertEquals(startTime, sentJson.getLong("startTime"));
         JSONArray chargesArray = sentJson.getJSONArray("charges");
         assertEquals(2, chargesArray.length());
         JSONObject charge1 = chargesArray.getJSONObject(0);
