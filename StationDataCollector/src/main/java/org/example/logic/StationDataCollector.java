@@ -24,6 +24,7 @@ public class StationDataCollector {
         try (Connection connection = config.createConnection();
              Channel channel = connection.createChannel()) {
 
+
             config.setupQueue(channel, INPUT_QUEUE);
             config.setupQueue(channel, OUTPUT_QUEUE);
 

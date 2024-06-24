@@ -20,6 +20,7 @@ import java.util.concurrent.TimeoutException;
 public class PDFGenerator {
 
     private static final String INPUT_QUEUE = "pdfGeneratorQueue";
+    private static final String OUTPUT_QUEUE = "invoiceMetadataQueue";
     private static final String OUTPUT_PATH = System.getProperty("user.home") + File.separator + "invoices" + File.separator;
 
     public static void main(String[] args) {
@@ -28,6 +29,7 @@ public class PDFGenerator {
              Channel channel = connection.createChannel()) {
 
             config.setupQueue(channel, INPUT_QUEUE);
+            config.setupQueue(channel, OUTPUT_QUEUE);
 
             System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
@@ -70,6 +72,17 @@ public class PDFGenerator {
                     document.add(new Paragraph("\nTotal kWh: " + totalKwh));
                     document.close();
                     System.out.println(" [x] PDF generated and saved to: " + outputPath);
+
+                    // Extract customerId from the rootNode
+                    int customerId = rootNode.get("customerId").asInt();
+
+                    // Send metadata back to InvoiceAPI
+                    JsonNode metadata = mapper.createObjectNode()
+                            .put("customerId", customerId)
+                            .put("filePath", outputPath)
+                            .put("creationTime", System.currentTimeMillis());
+                    channel.basicPublish("", OUTPUT_QUEUE, null, metadata.toString().getBytes(StandardCharsets.UTF_8));
+                    System.out.println(" [x] Sent Metadata: '" + metadata + "'");
                 } catch (DocumentException | IOException e) {
                     e.printStackTrace();
                 }

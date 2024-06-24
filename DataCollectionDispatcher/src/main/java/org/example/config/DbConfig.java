@@ -17,8 +17,4 @@ public class DbConfig {
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, USERNAME, PASSWORD);
     }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
 }

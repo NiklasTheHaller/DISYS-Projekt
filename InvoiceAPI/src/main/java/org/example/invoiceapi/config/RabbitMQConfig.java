@@ -13,6 +13,7 @@ public class RabbitMQConfig {
     private static final int PORT = 30003;
 
     public static final String INPUT_QUEUE = "inputQueue";
+    public static final String METADATA_QUEUE = "invoiceMetadataQueue";
 
     @Bean
     public CachingConnectionFactory connectionFactory() {
@@ -29,5 +30,10 @@ public class RabbitMQConfig {
     @Bean
     public Queue inputQueue() {
         return new Queue(INPUT_QUEUE, false);
+    }
+
+    @Bean
+    public Queue metadataQueue() {
+        return new Queue(METADATA_QUEUE, false);
     }
 }

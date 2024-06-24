@@ -64,6 +64,7 @@ public class DataCollectionReceiver {
 
                         if (received == jobCounts.get(customerId)) {
                             JSONObject aggregatedData = new JSONObject();
+                            aggregatedData.put("customerId", customerId);  // Include customerId in the message
                             aggregatedData.put("customer", "Customer: " + customerNames.get(customerId));
                             aggregatedData.put("charges", dataArray);
                             channel.basicPublish("", OUTPUT_QUEUE, null, aggregatedData.toString().getBytes(StandardCharsets.UTF_8));

@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class Db {
 
-    private static String dbUrl = "jdbc:postgresql://localhost:30011/stationdb"; // Default URL, will be overridden
+    private static String dbUrl = "jdbc:postgresql://localhost:30011/stationdb";
 
     public static void setDbUrl(String dbUrl) {
         Db.dbUrl = "jdbc:postgresql://" + dbUrl + "/stationdb";
