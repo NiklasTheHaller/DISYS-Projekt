@@ -1,0 +1,11 @@
+Lessons Learned:
+
+We learned, that splitting up the functionality of the singular services made the service easier to manipulate and maintain. Making changes and testing was much easier after refactoring some of the code.
+
+Unit Testing Decisions:
+
+We Decided to test simple cases in the Data Collection Dispatcher as well as the main functions in the other services. We also created a test for the PDF Generation.
+
+Total time spent estimate:
+
+25hrs
