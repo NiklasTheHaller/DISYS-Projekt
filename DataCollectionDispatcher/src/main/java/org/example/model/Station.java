@@ -14,6 +14,9 @@ public class Station {
         this.lng = lng;
     }
 
+    public Station(int id, String url1) {
+    }
+
     public int getId() {
         return id;
     }
